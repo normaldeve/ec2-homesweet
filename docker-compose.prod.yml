@@ -26,7 +26,7 @@ services:
     ports:
       - "9114:9114"
     command:
-      - '--es.uri=http://10.0.15.138:9200' # ← EC2 Private IP 로 수정
+      - '--es.uri=http://13.124.122.67:9200'
       - '--es.all'
     networks:
       - homesweet-network
