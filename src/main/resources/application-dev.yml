@@ -7,10 +7,10 @@ spring:
   config:
     import: optional:file:.env[.properties]
   datasource:
-    url: homesweethome-db.c1u66a2c2b17.ap-northeast-2.rds.amazonaws.com
+    url: ${DATABASE_URL:jdbc:mysql://localhost:3306/homesweet}
     driver-class-name: com.mysql.cj.jdbc.Driver
-    username: homesweet_user
-    password: homesweetpass
+    username: ${DATABASE_USERNAME:homesweet}
+    password: ${DATABASE_PASSWORD:homesweet}
 
   jpa:
     hibernate:
