@@ -19,6 +19,18 @@ services:
     ports:
       - "9100:9100"
 
+  elasticsearch_exporter:
+    image: quay.io/prometheuscommunity/elasticsearch-exporter:latest
+    container_name: elasticsearch_exporter
+    restart: always
+    ports:
+      - "9114:9114"
+    command:
+      - '--es.uri=http://10.0.15.138:9200' # ← EC2 Private IP 로 수정
+      - '--es.all'
+    networks:
+      - homesweet-network
+
   mysqld_exporter:
     image: prom/mysqld-exporter:latest
     container_name: mysqld_exporter
