@@ -1,12 +1,5 @@
 server:
   port: 8080
-  tomcat:
-    threads:
-      max: 500
-      min-spare: 50
-    accept-count: 2000 # OS 레벨 대기열 크기
-    max-connections: 10000 #
-    connection-timeout: 20000
 
 spring:
   application:
@@ -14,12 +7,10 @@ spring:
   config:
     import: optional:file:.env[.properties]
   datasource:
-    url: jdbc:mysql://localhost:3306/homesweet
+    url: homesweethome-db.c1u66a2c2b17.ap-northeast-2.rds.amazonaws.com
     driver-class-name: com.mysql.cj.jdbc.Driver
-    username: user
-    password: password
-    hikari:
-      maximum-pool-size: 150
+    username: homesweet_user
+    password: homesweetpass
 
   jpa:
     hibernate:
@@ -32,7 +23,7 @@ spring:
         use_sql_comments: true
         default_batch_fetch_size: 30
   elasticsearch:
-    uris: http://localhost:9200
+    uris: http://13.124.122.67:9200
   security:
     oauth2:
       client:
@@ -52,7 +43,7 @@ spring:
             user-name-attribute: id
   data:
     redis:
-      host: localhost
+      host: 43.202.57.75
       port: 6379
       password:
       timeout: 2000ms
