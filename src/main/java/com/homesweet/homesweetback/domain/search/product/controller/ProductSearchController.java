@@ -23,7 +23,7 @@ import java.util.List;
  */
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/v1/products")
+@RequestMapping("/api/v1/search/products")
 @ConditionalOnProperty(name = "search.elasticsearch.enabled", havingValue = "true")
 public class ProductSearchController {
 
@@ -33,7 +33,7 @@ public class ProductSearchController {
      * 인증 사용자 상품 조회 및 검색
      *
      */
-    @GetMapping("/search")
+    @GetMapping
     public ResponseEntity<SearchScrollResponse<ProductPreviewResponse>> searchProducts(
             @RequestParam(required = false) String nextCursor,
             @RequestParam(required = false) Long categoryId,
@@ -56,7 +56,7 @@ public class ProductSearchController {
     /**
      * 검색어 자동 완성 API
      */
-    @GetMapping("/search/autocomplete")
+    @GetMapping("/autocomplete")
     public ResponseEntity<List<String>> autocomplete(@NotNull @RequestParam String keyword) {
         List<String> result = productSearchService.autocomplete(keyword);
         return ResponseEntity.ok(result);
@@ -83,7 +83,7 @@ public class ProductSearchController {
         return ResponseEntity.ok(response);
     }
 
-    @GetMapping("/search/{productId}")
+    @GetMapping("/{productId}")
     public ResponseEntity<ProductDetailResponse> getProductDetail(
             @AuthenticationPrincipal OAuth2UserPrincipal principal,
             @PathVariable Long productId) {
