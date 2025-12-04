@@ -26,7 +26,6 @@ import java.util.List;
 
 @Repository
 @RequiredArgsConstructor
-@ConditionalOnProperty(name = "search.elasticsearch.enabled", havingValue = "true")
 public class CommunityPostSearchRepositoryImpl implements CommunityPostSearchRepository {
 
     private final ElasticsearchOperations operations;

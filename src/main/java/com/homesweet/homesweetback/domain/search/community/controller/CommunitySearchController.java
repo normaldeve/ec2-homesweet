@@ -26,7 +26,6 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/v1/search/community")
 @RequiredArgsConstructor
-@ConditionalOnProperty(name = "search.elasticsearch.enabled", havingValue = "true")
 public class CommunitySearchController {
 
     private final CommunitySearchService communitySearchService;

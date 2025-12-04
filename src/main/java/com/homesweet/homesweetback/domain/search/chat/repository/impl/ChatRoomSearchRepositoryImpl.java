@@ -31,7 +31,6 @@ import java.util.List;
  */
 @Repository
 @RequiredArgsConstructor
-@ConditionalOnProperty(name = "search.elasticsearch.enabled", havingValue = "true")
 public class ChatRoomSearchRepositoryImpl implements ChatRoomSearchRepository {
 
     private final ElasticsearchOperations operations;

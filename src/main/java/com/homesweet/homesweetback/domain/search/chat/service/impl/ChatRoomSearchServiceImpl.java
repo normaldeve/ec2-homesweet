@@ -27,7 +27,6 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
-@ConditionalOnProperty(name = "search.elasticsearch.enabled", havingValue = "true")
 public class ChatRoomSearchServiceImpl implements ChatRoomSearchService {
 
     private final ChatRoomSearchRepository chatRoomSearchRepository;

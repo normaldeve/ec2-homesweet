@@ -33,7 +33,6 @@ import java.util.List;
  */
 @Repository
 @RequiredArgsConstructor
-@ConditionalOnProperty(name = "search.elasticsearch.enabled", havingValue = "true")
 class ProductSearchRepositoryImpl implements ProductSearchRepository {
 
     private final ElasticsearchOperations operations;

@@ -22,7 +22,6 @@ import org.springframework.transaction.annotation.Transactional;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-@ConditionalOnProperty(name = "search.elasticsearch.enabled", havingValue = "true")
 public class ChatroomSyncService {
 
     private final ChatRoomRepository chatRoomRepository;

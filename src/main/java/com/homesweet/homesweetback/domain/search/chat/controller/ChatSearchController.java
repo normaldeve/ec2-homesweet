@@ -26,7 +26,6 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/v1/search/chat")
 @RequiredArgsConstructor
-@ConditionalOnProperty(name = "search.elasticsearch.enabled", havingValue = "true")
 public class ChatSearchController {
 
     private final ChatRoomSearchService chatRoomSearchService;

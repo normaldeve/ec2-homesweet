@@ -24,7 +24,6 @@ import java.util.List;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/search/products")
-@ConditionalOnProperty(name = "search.elasticsearch.enabled", havingValue = "true")
 public class ProductSearchController {
 
     private final ProductSearchService productSearchService;
