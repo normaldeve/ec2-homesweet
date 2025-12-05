@@ -62,12 +62,12 @@ class ProductSearchRepositoryImpl implements ProductSearchRepository {
      */
     // 검색어 자동 완성 쿼리
     private Query buildAutocompleteQuery(String keyword) {
-        return MultiMatchQuery.of(m -> m
+        return MatchQuery.of(m -> m
+                .field("name.autocomplete")
                 .query(keyword)
-                .type(TextQueryType.BoolPrefix)
-                .fields("name.autocomplete", "name.autocomplete._2gram", "name.autocomplete._3gram")
         )._toQuery();
     }
+
 
     // 하이라이트 처리
     private HighlightQuery buildHighlightQuery() {
@@ -78,11 +78,12 @@ class ProductSearchRepositoryImpl implements ProductSearchRepository {
 
         Highlight highlight = new Highlight(
                 params,
-                List.of(new HighlightField("nameAutocomplete"))
+                List.of(new HighlightField("name.autocomplete"))
         );
 
         return new HighlightQuery(highlight, ProductDocument.class);
     }
+
 
     // Elastic 검색 실행 쿼리
     private List<String> extractAutocompleteResults(SearchHits<ProductDocument> searchHits) {
