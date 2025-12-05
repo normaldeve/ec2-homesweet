@@ -62,16 +62,12 @@ class ProductSearchRepositoryImpl implements ProductSearchRepository {
      */
     // 검색어 자동 완성 쿼리
     private Query buildAutocompleteQuery(String keyword) {
-        return MultiMatchQuery.of(m -> m
+        return MatchQuery.of(m -> m
+                .field("name.autocomplete")
                 .query(keyword)
-                .fields(List.of(
-                        "brand.autocomplete^5",
-                        "name.autocomplete^2"
-                ))
-                .type(TextQueryType.BoolPrefix)
         )._toQuery();
-
     }
+
 
 
     // 하이라이트 처리
@@ -90,11 +86,12 @@ class ProductSearchRepositoryImpl implements ProductSearchRepository {
     }
 
 
+
     // Elastic 검색 실행 쿼리
     private List<String> extractAutocompleteResults(SearchHits<ProductDocument> searchHits) {
         return searchHits.getSearchHits().stream()
                 .map(hit -> {
-                    List<String> highlights = hit.getHighlightField("nameAutocomplete");
+                    List<String> highlights = hit.getHighlightField("name.autocomplete");
                     if (!highlights.isEmpty()) {
                         return highlights.getFirst();
                     }
