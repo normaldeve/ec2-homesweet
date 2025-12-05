@@ -33,32 +33,6 @@ public class ProductDocument {
             searchAnalyzer = "product_search_analyzer")
     private String name;
 
-    /** -------------------------
-     *  부분검색(Ngram) 필드
-     *  검색 시에는 사용되지 않도록 searchAnalyzer=standard 설정
-     *  ------------------------- */
-    @Field(type = FieldType.Text,
-            name = "name.ngram",
-            analyzer = "product_ngram_analyzer",
-            searchAnalyzer = "standard")
-    private String nameNgram;
-
-    /** -------------------------
-     *  자동완성(prefix) 필드
-     *  edge_ngram 기반의 autocomplete_analyzer 사용
-     *  ------------------------- */
-    @Field(type = FieldType.Text,
-            name = "name.autocomplete",
-            analyzer = "autocomplete_analyzer",
-            searchAnalyzer = "standard")
-    private String nameAutocomplete;
-
-    /** -------------------------
-     *  완전일치 검색용 Keyword 필드
-     *  ------------------------- */
-    @Field(type = FieldType.Keyword, name = "name.keyword")
-    private String nameKeyword;
-
     @Field(type = FieldType.Keyword)
     private String brand;
 
@@ -91,12 +65,6 @@ public class ProductDocument {
 
     @Field(type = FieldType.Keyword, name = "category_name")
     private String categoryName;
-
-    /** 카테고리 텍스트 검색용 필드 */
-    @Field(type = FieldType.Text,
-            name = "category_name.text",
-            analyzer = "product_search_analyzer")
-    private String categoryNameText;
 
     @Field(type = FieldType.Float, name = "average_rating")
     private Double averageRating;

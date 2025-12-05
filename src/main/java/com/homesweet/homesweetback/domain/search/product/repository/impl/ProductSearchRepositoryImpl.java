@@ -62,10 +62,15 @@ class ProductSearchRepositoryImpl implements ProductSearchRepository {
      */
     // 검색어 자동 완성 쿼리
     private Query buildAutocompleteQuery(String keyword) {
-        return MatchQuery.of(m -> m
-                .field("name.autocomplete")
+        return MultiMatchQuery.of(m -> m
                 .query(keyword)
+                .fields(List.of(
+                        "brand.autocomplete^5",
+                        "name.autocomplete^2"
+                ))
+                .type(TextQueryType.BoolPrefix)
         )._toQuery();
+
     }
 
 
@@ -154,7 +159,7 @@ class ProductSearchRepositoryImpl implements ProductSearchRepository {
 
         return MultiMatchQuery.of(m -> m
                 .query(keyword)
-                .fields(List.of("name^3","category_name^2","name.ngram","name.autocomplete"))
+                .fields(List.of("name^3","category_name^2"))
 //                .fuzziness("AUTO")
                 .prefixLength(1)
         )._toQuery();
