@@ -153,7 +153,7 @@ class ProductSearchRepositoryImpl implements ProductSearchRepository {
 
         return MultiMatchQuery.of(m -> m
                 .query(keyword)
-                .fields(List.of("name^3","category_name^2","name.ngram","name.autocomplete","description"))
+                .fields(List.of("name^3","category_name^2","name.ngram","name.autocomplete"))
 //                .fuzziness("AUTO")
                 .prefixLength(1)
         )._toQuery();

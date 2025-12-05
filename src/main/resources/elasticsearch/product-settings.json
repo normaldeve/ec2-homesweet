@@ -14,11 +14,17 @@
         "filter": ["lowercase"]
       },
       "autocomplete_analyzer": {
-        "tokenizer": "ngram_tokenizer",
+        "tokenizer": "autocomplete_tokenizer",
         "filter": ["lowercase"]
       }
     },
     "tokenizer": {
+      "autocomplete_tokenizer": {
+        "type": "edge_ngram",
+        "min_gram": 1,
+        "max_gram": 20,
+        "token_chars": ["letter", "digit", "whitespace"]
+      },
       "ngram_tokenizer": {
         "type": "ngram",
         "min_gram": 2,

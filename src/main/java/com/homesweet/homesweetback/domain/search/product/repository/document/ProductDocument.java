@@ -43,7 +43,7 @@ public class ProductDocument {
     @Field(type = FieldType.Keyword)
     private String brand;
 
-    @Field(type = FieldType.Text, analyzer = "product_search_analyzer", searchAnalyzer = "product_search_analyzer")
+    @Field(type = FieldType.Text, index = false)
     private String description;
 
     @Field(type = FieldType.Integer, name = "base_price")

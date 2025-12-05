@@ -10,6 +10,10 @@ export const options = {
 export default function () {
     const keyword = pickKeyword();
 
+    const top = getTopCategories();
+    check(top, { "top categories 200": (r) => r.status === 200 });
+    sleep(0.3);
+
     // 자동완성 시뮬레이션 (3~5회)
     for (let i = 0; i < Math.floor(Math.random() * 3) + 3; i++) {
         const auto = search(keyword.substring(0, i + 1), "&autocomplete=true");

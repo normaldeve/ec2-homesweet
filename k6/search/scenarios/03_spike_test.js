@@ -19,5 +19,8 @@ export default function () {
     const keyword = pickKeyword();
     const res = search(keyword);
 
-    check(res, { "status 200": (r) => r.status === 200 });
+    check(res, {
+        "status 200": r => r.status === 200,
+        "latency < 1s": r => r.timings.duration < 1000
+    });
 }
