@@ -6,12 +6,11 @@ import co.elastic.clients.elasticsearch._types.SortOrder;
 import co.elastic.clients.elasticsearch._types.query_dsl.*;
 import com.homesweet.homesweetback.common.util.scroll.CursorUtil;
 import com.homesweet.homesweetback.common.util.scroll.ProductCursorStrategy;
-import com.homesweet.homesweetback.domain.product.category.service.cache.CacheCategory;
+import com.homesweet.homesweetback.domain.search.category.RedisCategoryCache;
 import com.homesweet.homesweetback.domain.search.product.controller.request.ProductSortType;
 import com.homesweet.homesweetback.domain.search.product.repository.ProductSearchRepository;
 import com.homesweet.homesweetback.domain.search.product.repository.document.ProductDocument;
 import lombok.RequiredArgsConstructor;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.elasticsearch.client.elc.NativeQuery;
 import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
@@ -36,7 +35,7 @@ import java.util.List;
 class ProductSearchRepositoryImpl implements ProductSearchRepository {
 
     private final ElasticsearchOperations operations;
-    private final CacheCategory cacheCategory;
+    private final RedisCategoryCache cacheCategory;
     private final CursorUtil cursorUtil;
 
     /**
@@ -168,7 +167,7 @@ class ProductSearchRepositoryImpl implements ProductSearchRepository {
         filters.add(TermQuery.of(t -> t.field("status").value("ON_SALE"))._toQuery());
 
         if (categoryId != null) {
-            List<Long> categoryIds = cacheCategory.getAllSubCategoryIds(categoryId);
+            List<Long> categoryIds = cacheCategory.getChildren(categoryId);
 
             filters.add(
                     TermsQuery.of(t -> t

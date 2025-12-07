@@ -31,18 +31,6 @@ services:
     networks:
       - homesweet-network
 
-  mysqld_exporter:
-    image: prom/mysqld-exporter:latest
-    container_name: mysqld_exporter
-    restart: always
-    command:
-      - "--mysqld.username=${DATABASE_USERNAME}:${DATABASE_PASSWORD}"
-      - "--mysqld.address=${DATABASE_URL}"
-    ports:
-      - "9104:9104"
-    networks:
-      - homesweet-network
-
 networks:
   homesweet-network:
     driver: bridge

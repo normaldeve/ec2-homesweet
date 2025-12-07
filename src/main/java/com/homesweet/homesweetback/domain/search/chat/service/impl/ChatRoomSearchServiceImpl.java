@@ -2,14 +2,12 @@ package com.homesweet.homesweetback.domain.search.chat.service.impl;
 
 import com.homesweet.homesweetback.common.util.scroll.CursorUtil;
 import com.homesweet.homesweetback.common.util.scroll.SearchScrollResponse;
-import com.homesweet.homesweetback.domain.product.recent.service.RecentSearchService;
 import com.homesweet.homesweetback.domain.search.chat.controller.response.ChatRoomSearchResponse;
 import com.homesweet.homesweetback.domain.search.chat.controller.response.ChatRoomSortType;
 import com.homesweet.homesweetback.domain.search.chat.repository.ChatRoomSearchRepository;
 import com.homesweet.homesweetback.domain.search.chat.repository.document.ChatRoomDocument;
 import com.homesweet.homesweetback.domain.search.chat.service.ChatRoomSearchService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.data.elasticsearch.core.SearchHit;
 import org.springframework.data.elasticsearch.core.SearchHits;
 import org.springframework.stereotype.Service;

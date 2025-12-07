@@ -2,18 +2,12 @@ package com.homesweet.homesweetback.domain.search.product.service.impl;
 
 import com.homesweet.homesweetback.common.util.scroll.CursorUtil;
 import com.homesweet.homesweetback.common.util.scroll.SearchScrollResponse;
-import com.homesweet.homesweetback.common.valid.ProductValidator;
 import com.homesweet.homesweetback.domain.search.product.controller.request.ProductSortType;
-import com.homesweet.homesweetback.domain.product.product.command.controller.response.ProductDetailResponse;
-import com.homesweet.homesweetback.domain.product.product.command.repository.ProductRepository;
 import com.homesweet.homesweetback.domain.search.product.controller.response.ProductPreviewResponse;
 import com.homesweet.homesweetback.domain.search.product.repository.ProductSearchRepository;
 import com.homesweet.homesweetback.domain.search.product.repository.document.ProductDocument;
-import com.homesweet.homesweetback.domain.product.recent.service.RecentSearchService;
-import com.homesweet.homesweetback.domain.product.recent.service.RecentViewService;
 import com.homesweet.homesweetback.domain.search.product.service.ProductSearchService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.data.elasticsearch.core.SearchHit;
 import org.springframework.data.elasticsearch.core.SearchHits;
 import org.springframework.stereotype.Service;
@@ -32,12 +26,8 @@ import java.util.List;
 @Transactional(readOnly = true)
 public class ProductSearchServiceImpl implements ProductSearchService {
 
-    private final ProductSearchRepository productSearchRepository;
-    private final RecentSearchService recentSearchService;
+    private ProductSearchRepository productSearchRepository;
     private final CursorUtil cursorUtil;
-    private final ProductValidator productValidator;
-    private final ProductRepository productRepository;
-    private final RecentViewService recentViewService;
 
 
     @Override
@@ -51,40 +41,11 @@ public class ProductSearchServiceImpl implements ProductSearchService {
     @Override
     public SearchScrollResponse<ProductPreviewResponse> searchProducts(
             String cursor, Long categoryId, String keyword, ProductSortType sortType,
-            Double minPrice, Double maxPrice, int limit, Long userId, List<String> optionFilters) {
-
-        if (userId != null && keyword != null && !keyword.isBlank()) {
-            recentSearchService.save(userId, keyword);
-        }
+            Double minPrice, Double maxPrice, int limit, List<String> optionFilters) {
 
         return executeSearch(cursor, categoryId, keyword, sortType, minPrice, maxPrice, limit, optionFilters);
     }
 
-    /**
-     * [비인증] 사용자 상품 검색 및 조회
-     */
-    @Override
-    public SearchScrollResponse<ProductPreviewResponse> getProductPreview(String cursor, Long categoryId, String keyword, ProductSortType sortType, Double minPrice, Double maxPrice, int limit, List<String> optionFilters) {
-
-        return executeSearch(cursor, categoryId, keyword, sortType, minPrice, maxPrice, limit, optionFilters);
-    }
-
-    @Override
-    @Transactional(readOnly = true)
-    public ProductDetailResponse getProductDetail(Long userId, Long productId) {
-
-        productValidator.validateExistsProduct(productId);
-
-        // DB 상세 조회
-        ProductDetailResponse detail = productRepository.findProductDetailById(productId);
-
-        // productId 저장
-        recentViewService.saveView(userId, productId);
-
-        recentViewService.cacheDetail(productId, detail);
-
-        return detail;
-    }
 
     private SearchScrollResponse<ProductPreviewResponse> executeSearch(
             String cursor,

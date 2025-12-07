@@ -7,7 +7,15 @@ spring:
   config:
     import: optional:file:.env[.properties]
   elasticsearch:
-    uris: http://3.36.60.169:9200
+    uris: ${ELASTIC_URL}
+  data:
+    redis:
+      host: ${REDIS_URL}
+      port: 6379
+      password:
+      timeout: 2000ms
+  cache:
+    type: redis
 
 logging:
   level:

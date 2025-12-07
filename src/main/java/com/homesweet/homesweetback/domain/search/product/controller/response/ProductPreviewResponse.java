@@ -1,9 +1,6 @@
 package com.homesweet.homesweetback.domain.search.product.controller.response;
 
-import com.homesweet.homesweetback.domain.product.product.command.domain.Product;
-import com.homesweet.homesweetback.domain.product.product.command.domain.ProductStatus;
 import com.homesweet.homesweetback.domain.search.product.repository.document.ProductDocument;
-import com.homesweet.homesweetback.domain.product.review.domain.ProductReviewStatistics;
 import lombok.Builder;
 
 import java.math.BigDecimal;
@@ -32,28 +29,6 @@ public record ProductPreviewResponse(
         LocalDateTime createdAt,
         LocalDateTime updatedAt
 ) {
-
-    public static ProductPreviewResponse of(
-            Product product,
-            ProductReviewStatistics stats
-    ) {
-        return new ProductPreviewResponse(
-                product.getId(),
-                product.getCategoryId(),
-                product.getSellerId(),
-                product.getName(),
-                product.getImageUrl(),
-                product.getBrand(),
-                product.getBasePrice(),
-                product.getDiscountRate(),
-                product.getShippingPrice(),
-                product.getStatus(),
-                stats.averageRating(),
-                stats.totalCount(),
-                product.getCreatedAt(),
-                product.getUpdatedAt()
-        );
-    }
 
     public static ProductPreviewResponse fromDocument(ProductDocument document) {
         return ProductPreviewResponse.builder()

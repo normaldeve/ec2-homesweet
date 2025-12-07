@@ -1,16 +1,12 @@
 package com.homesweet.homesweetback.domain.search.product.controller;
 
 import com.homesweet.homesweetback.common.util.scroll.SearchScrollResponse;
-import com.homesweet.homesweetback.domain.auth.entity.OAuth2UserPrincipal;
 import com.homesweet.homesweetback.domain.search.product.controller.request.ProductSortType;
-import com.homesweet.homesweetback.domain.product.product.command.controller.response.ProductDetailResponse;
 import com.homesweet.homesweetback.domain.search.product.controller.response.ProductPreviewResponse;
 import com.homesweet.homesweetback.domain.search.product.service.ProductSearchService;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -41,13 +37,10 @@ public class ProductSearchController {
             @RequestParam(required = false) Double minPrice,
             @RequestParam(required = false) Double maxPrice,
             @RequestParam(defaultValue = "20") int limit,
-            @RequestParam(required = false, name = "optionFilters") List<String> optionFilters,
-            @AuthenticationPrincipal OAuth2UserPrincipal principal
+            @RequestParam(required = false, name = "optionFilters") List<String> optionFilters
     ) {
 
-        Long userId = principal.getUserId();
-
-        SearchScrollResponse<ProductPreviewResponse> result = productSearchService.searchProducts(nextCursor, categoryId, keyword, sortType, minPrice, maxPrice, limit, userId, optionFilters);
+        SearchScrollResponse<ProductPreviewResponse> result = productSearchService.searchProducts(nextCursor, categoryId, keyword, sortType, minPrice, maxPrice, limit, optionFilters);
 
         return ResponseEntity.ok(result);
     }
@@ -77,19 +70,7 @@ public class ProductSearchController {
     ) {
 
         SearchScrollResponse<ProductPreviewResponse> response =
-                productSearchService.getProductPreview(nextCursor, categoryId, keyword, sortType, minPrice, maxPrice, limit, optionFilters);
-
-        return ResponseEntity.ok(response);
-    }
-
-    @GetMapping("/{productId}")
-    public ResponseEntity<ProductDetailResponse> getProductDetail(
-            @AuthenticationPrincipal OAuth2UserPrincipal principal,
-            @PathVariable Long productId) {
-
-        Long userId = principal.getUserId();
-
-        ProductDetailResponse response = productSearchService.getProductDetail(userId, productId);
+                productSearchService.searchProducts(nextCursor, categoryId, keyword, sortType, minPrice, maxPrice, limit, optionFilters);
 
         return ResponseEntity.ok(response);
     }
