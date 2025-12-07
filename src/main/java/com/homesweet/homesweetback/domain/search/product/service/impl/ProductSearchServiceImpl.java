@@ -26,7 +26,7 @@ import java.util.List;
 @Transactional(readOnly = true)
 public class ProductSearchServiceImpl implements ProductSearchService {
 
-    private ProductSearchRepository productSearchRepository;
+    private final ProductSearchRepository productSearchRepository;
     private final CursorUtil cursorUtil;
 
 

@@ -32,7 +32,7 @@ import java.util.List;
  */
 @Repository
 @RequiredArgsConstructor
-class ProductSearchRepositoryImpl implements ProductSearchRepository {
+public class ProductSearchRepositoryImpl implements ProductSearchRepository {
 
     private final ElasticsearchOperations operations;
     private final RedisCategoryCache cacheCategory;
