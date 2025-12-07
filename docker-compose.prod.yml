@@ -2,8 +2,8 @@ version: '3.9'
 
 services:
   spring:
-    image: homesweet-backend
-    container_name: homesweet-backend
+    image: search-backend
+    container_name: search-backend
     ports:
       - "8080:8080"
     env_file:
