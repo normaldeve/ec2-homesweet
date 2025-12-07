@@ -16,6 +16,6 @@ public interface ChatRoomSearchService {
 
     List<String> autocomplete(String keyword);
 
-    SearchScrollResponse<ChatRoomSearchResponse> search(Long userId, String cursor, String keyword, int limit, ChatRoomSortType sortType);
+    SearchScrollResponse<ChatRoomSearchResponse> search(String cursor, String keyword, int limit, ChatRoomSortType sortType);
 
 }

@@ -30,7 +30,6 @@ import java.util.List;
 public class ChatRoomSearchServiceImpl implements ChatRoomSearchService {
 
     private final ChatRoomSearchRepository chatRoomSearchRepository;
-    private final RecentSearchService recentSearchService;
     private final CursorUtil cursorUtil;
 
     @Override
@@ -39,12 +38,7 @@ public class ChatRoomSearchServiceImpl implements ChatRoomSearchService {
     }
 
     @Override
-    public SearchScrollResponse<ChatRoomSearchResponse> search(Long userId, String cursor, String keyword, int limit, ChatRoomSortType sortType) {
-
-        if (userId != null && keyword != null && !keyword.isBlank()) {
-            recentSearchService.save(userId, keyword);
-        }
-
+    public SearchScrollResponse<ChatRoomSearchResponse> search(String cursor, String keyword, int limit, ChatRoomSortType sortType) {
         SearchHits<ChatRoomDocument> hits =
                 chatRoomSearchRepository.search(keyword, cursor, limit, sortType);
 

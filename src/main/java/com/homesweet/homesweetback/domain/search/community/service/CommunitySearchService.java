@@ -17,5 +17,5 @@ public interface CommunitySearchService {
 
     List<String> autocomplete(String keyword);
 
-    SearchScrollResponse<CommunityPostSearchResponse> search(Long userId, String cursor, String keyword, int limit, CommunitySortType sortType);
+    SearchScrollResponse<CommunityPostSearchResponse> search(String cursor, String keyword, int limit, CommunitySortType sortType);
 }
