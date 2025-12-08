@@ -34,8 +34,8 @@ spring:
 server:
   tomcat:
     threads:
-      max: 200
-      min-spare: 50
+      max: 100
+      min-spare: 20
     accept-count: 200
 
 resilience4j:

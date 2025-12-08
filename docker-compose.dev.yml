@@ -1,157 +1,5 @@
 version: '3.9'
 services:
-  db:
-    image: mysql:8.0
-    container_name: homesweet-db
-    environment:
-      MYSQL_ROOT_PASSWORD: rootpassword
-      MYSQL_DATABASE: homesweet
-      MYSQL_USER: user
-      MYSQL_PASSWORD: password
-    ports:
-      - "3306:3306"
-    volumes:
-      - mysqldata:/var/lib/mysql
-    networks:
-      - homesweet-network
-
-  redis:
-    image: redis:7.2
-    container_name: homesweet-redis
-    restart: always
-    ports:
-      - "6379:6379"
-    command: >
-      redis-server --appendonly yes
-    volumes:
-      - redisdata:/data
-    networks:
-      - homesweet-network
-
-  redis_insight:
-    image: redis/redisinsight:latest
-    container_name: redis-insight
-    restart: always
-    ports:
-      - "5540:5540"
-    networks:
-      - homesweet-network
-
-  node_exporter:
-    image: prom/node-exporter:latest
-    container_name: node_exporter
-    restart: always
-    ports:
-      - "9100:9100"
-    networks:
-      - homesweet-network
-
-  mysqld_exporter:
-    image: prom/mysqld-exporter:latest
-    container_name: mysqld_exporter
-    restart: always
-    command:
-      - "--mysqld.username=exporter:root"
-      - "--mysqld.address=homesweet-db:3306"
-    ports:
-      - "9104:9104"
-    networks:
-      - homesweet-network
-
-  zookeeper:
-    image: confluentinc/cp-zookeeper:7.5.0
-    container_name: zookeeper
-    environment:
-      ZOOKEEPER_CLIENT_PORT: 2181
-      ZOOKEEPER_TICK_TIME: 2000
-    ports:
-      - "2181:2181"
-    networks:
-      - homesweet-network
-
-  ### Kafka (단일)
-  kafka:
-    image: confluentinc/cp-kafka:7.5.0
-    container_name: kafka
-    depends_on:
-      - zookeeper
-    ports:
-      - "9092:9092"   # 외부(Spring Boot) 접근
-      - "29092:29092" # 내부(Docker 간 통신)
-    environment:
-      KAFKA_BROKER_ID: 1
-      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
-      # 내부/외부 리스너 설정
-      KAFKA_LISTENERS: PLAINTEXT_INTERNAL://0.0.0.0:29092,PLAINTEXT_EXTERNAL://0.0.0.0:9092
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT_INTERNAL://kafka:29092,PLAINTEXT_EXTERNAL://localhost:9092
-      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT_INTERNAL:PLAINTEXT,PLAINTEXT_EXTERNAL:PLAINTEXT
-      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT_INTERNAL
-      # replication 관련 완화 (로컬 개발용)
-      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
-      KAFKA_MIN_INSYNC_REPLICAS: 1
-      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
-      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
-    networks:
-      - homesweet-network
-
-  ### Kafka UI
-  kafka-ui:
-    image: provectuslabs/kafka-ui:latest
-    container_name: kafka-ui
-    ports:
-      - "8989:8080"
-    restart: always
-    environment:
-      - KAFKA_CLUSTERS_0_NAME=local
-      - KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS=kafka:29092
-      - KAFKA_CLUSTERS_0_ZOOKEEPER=zookeeper:2181
-    depends_on:
-      - kafka
-    networks:
-      - homesweet-network
-
-  elasticsearch:
-    build:
-      context: .
-      dockerfile: Dockerfile.elasticsearch
-    container_name: elasticsearch
-    environment:
-      - discovery.type=single-node
-      - xpack.security.enabled=false
-      - ES_JAVA_OPTS=-Xms1g -Xmx1g
-    ports:
-      - "9200:9200"
-    volumes:
-      - es_data:/usr/share/elasticsearch/data
-    networks:
-      - homesweet-network
-
-  logstash:
-    image: docker.elastic.co/logstash/logstash:8.15.0
-    container_name: logstash
-    depends_on:
-      - elasticsearch
-    ports:
-      - "5044:5044"
-      - "9600:9600"
-    volumes:
-      - ./logstash/pipeline:/usr/share/logstash/pipeline
-    environment:
-      LS_JAVA_OPTS: "-Xms512m -Xmx512m"
-    networks:
-      - homesweet-network
-
-  kibana:
-    image: docker.elastic.co/kibana/kibana:8.15.0
-    container_name: kibana
-    depends_on:
-      - elasticsearch
-    ports:
-      - "5601:5601"
-    environment:
-      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
-    networks:
-      - homesweet-network
 
   influxdb:
     image: influxdb:1.8
@@ -220,6 +68,16 @@ services:
     depends_on:
       - mysqld_exporter
 
+  kibana:
+    image: docker.elastic.co/kibana/kibana:8.15.0
+    container_name: kibana
+    ports:
+      - "5601:5601"
+    environment:
+      - ELASTICSEARCH_HOSTS=http://3.35.226.34:9200
+    networks:
+      - homesweet-network
+
 networks:
   homesweet-network:
     driver: bridge
@@ -227,9 +85,6 @@ networks:
     driver: bridge
 
 volumes:
-  mysqldata:
-  redisdata:
-  es_data:
   grafana-storage:
   influxdb-data:
   grafana-data:

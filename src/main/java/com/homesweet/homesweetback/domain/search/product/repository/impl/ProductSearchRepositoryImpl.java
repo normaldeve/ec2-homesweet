@@ -13,6 +13,7 @@ import com.homesweet.homesweetback.domain.search.product.repository.document.Pro
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.elasticsearch.client.elc.NativeQuery;
+import org.springframework.data.elasticsearch.client.elc.ReactiveElasticsearchClient;
 import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
 import org.springframework.data.elasticsearch.core.SearchHits;
 import org.springframework.data.elasticsearch.core.query.HighlightQuery;
@@ -112,7 +113,7 @@ public class ProductSearchRepositoryImpl implements ProductSearchRepository {
      * @param sortType   정렬 방법 (인기순, 최저가, 최고가, 최신순)
      * @param minPrice   최저 가격
      * @param maxPrice   최고 가격
-     * @return
+     * @returna
      */
     @Override
     public SearchHits<ProductDocument> search(String nextCursor, Long categoryId, int limit, String keyword, ProductSortType sortType, Double minPrice, Double maxPrice, List<String> optionFilters) {

@@ -29,9 +29,9 @@ public class ElasticsearchConfig {
         return RestClient.builder(HttpHost.create(elasticsearchUrl))
                 .setHttpClientConfigCallback(httpClientBuilder -> httpClientBuilder
                         // 전체 커넥션 수
-                        .setMaxConnTotal(200)
+                        .setMaxConnTotal(300)
                         // 노드당 커넥션 수
-                        .setMaxConnPerRoute(50)
+                        .setMaxConnPerRoute(100)
                 )
                 .build();
     }
