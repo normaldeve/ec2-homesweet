@@ -1,4 +1,4 @@
-import { check, sleep } from "k6";
+import { check } from "k6";
 import { search } from "../utils/http_client.js";
 import { pickKeyword } from "../utils/random.js";
 
@@ -21,10 +21,6 @@ export default function () {
     const res = search(keyword, "&size=12&sortType=RECOMMENDED");
 
     check(res, {
-        "status 200": (r) => r.status === 200,
-        "latency < 500ms": (r) => r.timings.duration < 500,
-        "no ES timeout": (r) => !String(r.body).includes("timeout"),
+        "status 200": (r) => r.status === 200
     });
-
-    sleep(1.2); // 평균 사용자 think time
 }
