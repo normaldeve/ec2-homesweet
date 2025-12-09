@@ -26,7 +26,7 @@ services:
     ports:
       - "9114:9114"
     command:
-      - '--es.uri=http://13.125.212.29:9200'
+      - '--es.uri=http://3.34.183.157:9200'
       - '--es.all'
     networks:
       - homesweet-network
