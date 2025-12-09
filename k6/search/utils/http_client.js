@@ -1,6 +1,6 @@
 import http from "k6/http";
 
-const API_HOST = "http://43.201.108.31:8080";
+const API_HOST = "http://13.125.177.194:8080";
 const SEARCH_URL = `${API_HOST}/api/v1/search/products`;
 const CATEGORY_URL = `${API_HOST}/api/v1/categories`;
 

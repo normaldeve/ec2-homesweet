@@ -4,13 +4,19 @@ import { pickKeyword } from "../utils/random.js";
 
 export const options = {
     scenarios: {
-        ramp_step_1: { executor: "constant-arrival-rate", rate: 300,  duration: "1m", preAllocatedVUs: 1000, maxVUs: 5000 },
-        ramp_step_2: { executor: "constant-arrival-rate", rate: 700, duration: "1m", startTime: "1m", preAllocatedVUs: 2000, maxVUs: 5000 },
-        ramp_step_3: { executor: "constant-arrival-rate", rate: 1500, duration: "1m", startTime: "2m", preAllocatedVUs: 3000 },
-        ramp_step_4: { executor: "constant-arrival-rate", rate: 3000, duration: "1m", startTime: "3m", preAllocatedVUs: 5000 },
-        ramp_step_5: { executor: "constant-arrival-rate", rate: 5000, duration: "1m", startTime: "4m", preAllocatedVUs: 8000 },
-        ramp_step_6: { executor: "constant-arrival-rate", rate: 10000, duration: "1m", startTime: "5m", preAllocatedVUs: 15000 }
+        user_load: {
+            executor: "ramping-vus",
+            startVUs: 0,
+            stages: [
+                // 실제 동시 접속자가 만 명일 때 평균 3초에 한 번 검색을 한다..
+                { duration: "2m", target: 200 },
+                { duration: "2m", target: 500 },
+                { duration: "2m", target: 1000 },
+                { duration: "2m", target: 3000 },
+            ]
+        }
     }
+
 };
 
 export default function () {
