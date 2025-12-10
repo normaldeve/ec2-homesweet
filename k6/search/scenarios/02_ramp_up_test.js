@@ -9,10 +9,10 @@ export const options = {
             startVUs: 0,
             stages: [
                 // 실제 동시 접속자가 만 명일 때 평균 3초에 한 번 검색을 한다..
-                { duration: "2m", target: 100 },
-                { duration: "2m", target: 500 },
-                { duration: "2m", target: 1000 },
-                { duration: "2m", target: 3000 },
+                { duration: "5m", target: 100 },
+                { duration: "5m", target: 500 },
+                { duration: "5m", target: 1000 },
+                { duration: "5m", target: 3000 },
             ]
         }
     }

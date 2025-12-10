@@ -14,12 +14,10 @@ spring:
       port: 6379
       password:
       timeout: 2000ms
-  cache:
-    type: redis
 
 logging:
   level:
-    root: ERROR
+    root: info
 
 management:
   endpoints:
