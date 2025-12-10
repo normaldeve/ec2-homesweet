@@ -27,13 +27,24 @@ public class ElasticsearchConfig {
     @Bean
     public RestClient restClient() {
 
-        return RestClient.builder(HttpHost.create(elasticsearchUrl))
-                .setHttpClientConfigCallback(httpClientBuilder -> httpClientBuilder
-                        // 전체 커넥션 수
-                        .setMaxConnTotal(90)
-                        // 노드당 커넥션 수
-                        .setMaxConnPerRoute(30)
+        return RestClient.builder(
+                        HttpHost.create(elasticsearchUrl)
                 )
+                .setRequestConfigCallback(requestConfigBuilder -> requestConfigBuilder
+                        .setConnectTimeout(800)
+                        .setSocketTimeout(1500)
+                        .setConnectionRequestTimeout(300)
+                )
+                .setHttpClientConfigCallback(httpClientBuilder -> httpClientBuilder
+                        .setMaxConnTotal(50)
+                        .setMaxConnPerRoute(20)
+                        .setDefaultIOReactorConfig(IOReactorConfig.custom()
+                                .setIoThreadCount(2)
+                                .build()
+                        )
+                        .setKeepAliveStrategy((resp, ctx) -> 60_000)
+                )
+                .setCompressionEnabled(true)
                 .build();
     }
 
