@@ -38,10 +38,6 @@ public class ElasticsearchConfig {
                 .setHttpClientConfigCallback(httpClientBuilder -> httpClientBuilder
                         .setMaxConnTotal(50)
                         .setMaxConnPerRoute(20)
-                        .setDefaultIOReactorConfig(IOReactorConfig.custom()
-                                .setIoThreadCount(2)
-                                .build()
-                        )
                         .setKeepAliveStrategy((resp, ctx) -> 60_000)
                 )
                 .setCompressionEnabled(true)
