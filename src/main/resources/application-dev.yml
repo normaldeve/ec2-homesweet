@@ -16,9 +16,6 @@ spring:
       timeout: 2000ms
   cache:
     type: redis
-  threads:
-    virtual:
-      enabled: true
 
 logging:
   level:
