@@ -34,7 +34,7 @@ public class SearchCacheRedisConfig {
         RedisStandaloneConfiguration config = new RedisStandaloneConfiguration();
         config.setHostName(host);
         config.setPort(port);
-        config.setDatabase(2); // Database 2번 사용
+        config.setDatabase(0);
 
         return new LettuceConnectionFactory(config);
     }
