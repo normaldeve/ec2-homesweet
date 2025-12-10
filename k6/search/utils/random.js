@@ -1,11 +1,9 @@
 import { POPULAR_KEYWORDS } from "../keywords/popular_keywords.js";
 import { MID_KEYWORDS } from "../keywords/mid_keywords.js";
-import { LONGTAIL_KEYWORDS } from "../keywords/longtail_keywords.js";
 
 const WEIGHTED_TYPES = [
     "POPULAR", "POPULAR", "POPULAR", "POPULAR", "POPULAR", "POPULAR",
-    "MID", "MID", "MID",
-    "LONGTAIL"
+    "MID", "MID", "MID", "MID"
 ];
 
 let index = 0;
@@ -21,7 +19,5 @@ export function pickKeyword() {
             return POPULAR_KEYWORDS[Math.floor(Math.random() * POPULAR_KEYWORDS.length)];
         case "MID":
             return MID_KEYWORDS[Math.floor(Math.random() * MID_KEYWORDS.length)];
-        case "LONGTAIL":
-            return LONGTAIL_KEYWORDS[Math.floor(Math.random() * LONGTAIL_KEYWORDS.length)];
     }
 }

@@ -7,7 +7,7 @@ export const options = {
         average_rps: {
             executor: "constant-arrival-rate",
             rate: 100,
-            timeUnit: "1s",
+            timeUnit: "2s",
             duration: "3m",
             preAllocatedVUs: 600,
             maxVUs: 2000

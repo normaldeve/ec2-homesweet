@@ -31,7 +31,7 @@ public class PopularSearchCacheService {
     private final ObjectMapper objectMapper;
 
     // 캐싱 임계값: 5회 이상 검색 시 캐싱
-    private static final int CACHE_THRESHOLD = 5;
+    private static final int CACHE_THRESHOLD = 1000000;
 
     // 검색 빈도 카운터 TTL: 24시간
     private static final Duration COUNTER_TTL = Duration.ofHours(24);
