@@ -211,33 +211,4 @@ public class PopularSearchCacheService {
 
         return 0L;
     }
-
-    /**
-     * 캐시 무효화
-     */
-    public void invalidateCache(String keyword, Long categoryId, ProductSortType sortType,
-                                Double minPrice, Double maxPrice, List<String> optionFilters) {
-        String cacheKey = generateCacheKey(keyword, categoryId, sortType, minPrice, maxPrice, optionFilters);
-        if (cacheKey != null) {
-            redisTemplate.delete(cacheKey);
-            log.info("캐시 무효화: {}", cacheKey);
-        }
-    }
-
-    /**
-     * 특정 검색어의 모든 캐시 무효화 (패턴 매칭)
-     */
-    public void invalidateAllCachesByKeyword(String keyword) {
-        String normalizedKeyword = normalizeKeyword(keyword);
-        if (normalizedKeyword == null) {
-            return;
-        }
-
-        String pattern = SEARCH_CACHE_PREFIX + normalizedKeyword + "*";
-        Set<String> keys = redisTemplate.keys(pattern);
-        if (keys != null && !keys.isEmpty()) {
-            redisTemplate.delete(keys);
-            log.info("검색어 관련 모든 캐시 무효화: {} ({}개)", normalizedKeyword, keys.size());
-        }
-    }
 }
