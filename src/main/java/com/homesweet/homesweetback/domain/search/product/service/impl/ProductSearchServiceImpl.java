@@ -18,6 +18,11 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
+/**
+ * 상품 검색 서비스 구현체 (인기 검색어 캐싱 적용)
+ *
+ * @author junnukim1007gmail.com
+ */
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -42,7 +47,7 @@ public class ProductSearchServiceImpl implements ProductSearchService {
             Double minPrice, Double maxPrice, int limit, List<String> optionFilters) {
 
         // 첫 페이지이고 키워드가 있는 경우에만 캐싱 로직 적용
-        if (cursor == null || keyword != null && !keyword.isBlank()) {
+        if (cursor == null && keyword != null && !keyword.isBlank()) {
 
             // 1. 검색 카운트 증가
             boolean shouldCache = cacheService.incrementSearchCount(keyword);

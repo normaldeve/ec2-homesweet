@@ -10,7 +10,7 @@ spring:
     uris: ${ELASTIC_URL}
   data:
     redis:
-      host: ${REDIS_URL}
+      host: localhost
       port: 6379
       password:
       timeout: 2000ms

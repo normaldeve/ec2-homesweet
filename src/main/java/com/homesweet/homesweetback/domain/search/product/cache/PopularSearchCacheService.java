@@ -7,6 +7,7 @@ import com.homesweet.homesweetback.domain.search.product.controller.request.Prod
 import com.homesweet.homesweetback.domain.search.product.controller.response.ProductPreviewResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
@@ -24,7 +25,9 @@ import java.util.*;
 @RequiredArgsConstructor
 public class PopularSearchCacheService {
 
+    @Qualifier("searchCacheRedisTemplate")
     private final RedisTemplate<String, Object> redisTemplate;
+
     private final ObjectMapper objectMapper;
 
     // 캐싱 임계값: 5회 이상 검색 시 캐싱
@@ -42,9 +45,7 @@ public class PopularSearchCacheService {
 
     // 한국어 불용어 리스트
     private static final Set<String> STOP_WORDS = Set.of(
-            "의", "가", "이", "은", "들", "는", "좀", "잘", "걍", "도", "으로", "자",
-            "에", "와", "한", "하다", "을", "를", "인", "듯", "과", "네", "듯이", "지",
-            "및", "그", "저", "것", "등", "더", "very", "more", "most", "the", "a", "an"
+            "의", "가"
     );
 
     /**
@@ -140,12 +141,11 @@ public class PopularSearchCacheService {
         }
 
         try {
-            Object raw = redisTemplate.opsForValue().get(cacheKey);
-
-            String cached = raw != null ? raw.toString() : null;
+            Object cached = redisTemplate.opsForValue().get(cacheKey);
             if (cached != null) {
                 log.info("캐시 히트: {}", cacheKey);
-                return objectMapper.readValue(cached,
+                String jsonString = cached instanceof String ? (String) cached : objectMapper.writeValueAsString(cached);
+                return objectMapper.readValue(jsonString,
                         objectMapper.getTypeFactory().constructParametricType(
                                 SearchScrollResponse.class, ProductPreviewResponse.class));
             }
@@ -159,9 +159,6 @@ public class PopularSearchCacheService {
     /**
      * 검색 결과 캐싱 (첫 페이지 12개만)
      */
-    /**
-     * 검색 결과 캐싱 (첫 페이지 12개만)
-     */
     public void cacheSearchResult(String cacheKey, SearchScrollResponse<ProductPreviewResponse> response) {
         if (cacheKey == null || response == null) {
             return;
@@ -169,7 +166,9 @@ public class PopularSearchCacheService {
 
         try {
             // 첫 페이지 12개만 캐싱
-            List<ProductPreviewResponse> limitedData = response.contents().stream()
+            // SearchScrollResponse의 실제 getter 메서드에 맞춰 수정 필요
+            List<ProductPreviewResponse> allData = response.contents();
+            List<ProductPreviewResponse> limitedData = allData.stream()
                     .limit(12)
                     .toList();
 
@@ -210,5 +209,34 @@ public class PopularSearchCacheService {
         }
 
         return 0L;
+    }
+
+    /**
+     * 캐시 무효화
+     */
+    public void invalidateCache(String keyword, Long categoryId, ProductSortType sortType,
+                                Double minPrice, Double maxPrice, List<String> optionFilters) {
+        String cacheKey = generateCacheKey(keyword, categoryId, sortType, minPrice, maxPrice, optionFilters);
+        if (cacheKey != null) {
+            redisTemplate.delete(cacheKey);
+            log.info("캐시 무효화: {}", cacheKey);
+        }
+    }
+
+    /**
+     * 특정 검색어의 모든 캐시 무효화 (패턴 매칭)
+     */
+    public void invalidateAllCachesByKeyword(String keyword) {
+        String normalizedKeyword = normalizeKeyword(keyword);
+        if (normalizedKeyword == null) {
+            return;
+        }
+
+        String pattern = SEARCH_CACHE_PREFIX + normalizedKeyword + "*";
+        Set<String> keys = redisTemplate.keys(pattern);
+        if (keys != null && !keys.isEmpty()) {
+            redisTemplate.delete(keys);
+            log.info("검색어 관련 모든 캐시 무효화: {} ({}개)", normalizedKeyword, keys.size());
+        }
     }
 }
