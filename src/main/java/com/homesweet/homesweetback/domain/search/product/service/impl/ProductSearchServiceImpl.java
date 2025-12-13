@@ -2,7 +2,10 @@ package com.homesweet.homesweetback.domain.search.product.service.impl;
 
 import com.homesweet.homesweetback.common.util.scroll.CursorUtil;
 import com.homesweet.homesweetback.common.util.scroll.SearchScrollResponse;
-import com.homesweet.homesweetback.domain.search.product.cache.PopularSearchCacheService;
+import com.homesweet.homesweetback.domain.search.log.event.SearchLogEvent;
+import com.homesweet.homesweetback.domain.search.log.service.SearchLogService;
+import com.homesweet.homesweetback.domain.search.product.cache.KeywordNormalizedService;
+import com.homesweet.homesweetback.domain.search.product.cache.SearchCacheService;
 import com.homesweet.homesweetback.domain.search.product.controller.request.ProductSortType;
 import com.homesweet.homesweetback.domain.search.product.controller.response.ProductPreviewResponse;
 import com.homesweet.homesweetback.domain.search.product.repository.ProductSearchRepository;
@@ -19,7 +22,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 /**
- * 상품 검색 서비스 구현체 (인기 검색어 캐싱 적용)
+ * 상품 검색 서비스 (정규화 + 캐싱 + 로깅)
  *
  * @author junnukim1007gmail.com
  */
@@ -31,69 +34,72 @@ public class ProductSearchServiceImpl implements ProductSearchService {
 
     private final ProductSearchRepository productSearchRepository;
     private final CursorUtil cursorUtil;
-    private final PopularSearchCacheService cacheService;
+    private final KeywordNormalizedService normalizationService;
+    private final SearchCacheService cacheService;
+    private final SearchLogService searchLogService;
 
     @Override
     public List<String> autocomplete(String keyword) {
         return productSearchRepository.autocomplete(keyword);
     }
 
-    /**
-     * [인증] 사용자 상품 검색 및 조회 (캐싱 적용)
-     */
     @Override
     public SearchScrollResponse<ProductPreviewResponse> searchProducts(
             String cursor, Long categoryId, String keyword, ProductSortType sortType,
             Double minPrice, Double maxPrice, int limit, List<String> optionFilters) {
 
-        // 첫 페이지이고 키워드가 있는 경우에만 캐싱 로직 적용
+        long startTime = System.currentTimeMillis();
+        boolean cacheHit = false;
+        SearchScrollResponse<ProductPreviewResponse> result;
+
+        // 첫 페이지 + 키워드 검색 시 캐싱 로직
         if (cursor == null && keyword != null && !keyword.isBlank()) {
 
-            // 1. 검색 카운트 증가
+            // 검색 카운트 증가
             boolean shouldCache = cacheService.incrementSearchCount(keyword);
 
-            // 2. 캐시 키 생성
+            // 캐시 키 생성
             String cacheKey = cacheService.generateCacheKey(
-                    keyword, categoryId, sortType, minPrice, maxPrice, optionFilters);
+                    keyword, categoryId, sortType.name(), minPrice, maxPrice);
 
-            // 3. 캐시에서 조회 시도 (5회 이상 검색된 경우)
+            // 캐시 조회
             if (shouldCache && cacheKey != null) {
-                SearchScrollResponse<ProductPreviewResponse> cachedResult =
-                        cacheService.getCachedResult(cacheKey);
+                result = cacheService.getCachedResult(cacheKey, ProductPreviewResponse.class);
 
-                if (cachedResult != null) {
-                    log.info("캐시된 검색 결과 반환: {}", keyword);
-                    return cachedResult;
+                if (result != null) {
+                    cacheHit = true;
+                    logSearchEvent(keyword, categoryId, sortType, minPrice, maxPrice,
+                            optionFilters, cursor, limit, result,
+                            System.currentTimeMillis() - startTime, cacheHit);
+                    return result;
                 }
 
-                // 4. 캐시 미스 - 검색 실행 후 캐싱
-                log.info("캐시 미스 - 검색 실행 및 캐싱: {}", keyword);
-                SearchScrollResponse<ProductPreviewResponse> result =
-                        executeSearch(cursor, categoryId, keyword, sortType, minPrice, maxPrice, 12, optionFilters);
-
+                // 캐시 미스 - 검색 실행 후 캐싱
+                result = executeSearch(cursor, categoryId, keyword, sortType,
+                        minPrice, maxPrice, limit, optionFilters);
                 cacheService.cacheSearchResult(cacheKey, result);
+
+                logSearchEvent(keyword, categoryId, sortType, minPrice, maxPrice,
+                        optionFilters, cursor, limit, result,
+                        System.currentTimeMillis() - startTime, cacheHit);
                 return result;
             }
-
-            // 5. 아직 캐싱 임계값 미달 - 일반 검색 실행
-            Long currentCount = cacheService.getSearchCount(keyword);
-            log.debug("검색 실행 (캐싱 미달: {}/5): {}", currentCount, keyword);
         }
 
-        // 일반 검색 실행 (페이징, 비키워드 검색 등)
-        return executeSearch(cursor, categoryId, keyword, sortType, minPrice, maxPrice, limit, optionFilters);
+        // 일반 검색
+        result = executeSearch(cursor, categoryId, keyword, sortType,
+                minPrice, maxPrice, limit, optionFilters);
+
+        logSearchEvent(keyword, categoryId, sortType, minPrice, maxPrice,
+                optionFilters, cursor, limit, result,
+                System.currentTimeMillis() - startTime, cacheHit);
+
+        return result;
     }
 
     private SearchScrollResponse<ProductPreviewResponse> executeSearch(
-            String cursor,
-            Long categoryId,
-            String keyword,
-            ProductSortType sortType,
-            Double minPrice,
-            Double maxPrice,
-            int limit,
-            List<String> optionFilters
-    ) {
+            String cursor, Long categoryId, String keyword, ProductSortType sortType,
+            Double minPrice, Double maxPrice, int limit, List<String> optionFilters) {
 
         SearchHits<ProductDocument> hits = productSearchRepository.search(
                 cursor, categoryId, limit, keyword, sortType, minPrice, maxPrice, optionFilters);
@@ -105,20 +111,18 @@ public class ProductSearchServiceImpl implements ProductSearchService {
         boolean hasNext = docs.size() > limit;
         List<ProductDocument> result = hasNext ? docs.subList(0, limit) : docs;
         ProductDocument lastDoc = hasNext ? result.getLast() : null;
-
         Float lastScore = hasNext ? hits.getSearchHits().get(limit - 1).getScore() : null;
 
         List<Object> sortValues = lastDoc != null ? switch (sortType) {
             case RECOMMENDED -> List.of(lastScore, lastDoc.getProductId());
-            case LATEST -> List.of(lastDoc.getCreatedAt().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME),
+            case LATEST -> List.of(
+                    lastDoc.getCreatedAt().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME),
                     lastDoc.getProductId());
-            case PRICE_LOW, PRICE_HIGH ->
-                    List.of(lastDoc.getBasePrice(), lastDoc.getProductId());
+            case PRICE_LOW, PRICE_HIGH -> List.of(lastDoc.getBasePrice(), lastDoc.getProductId());
             case POPULAR -> List.of(
                     lastDoc.getAverageRating() != null ? lastDoc.getAverageRating() : 0.0,
                     lastDoc.getReviewCount() != null ? lastDoc.getReviewCount() : 0,
-                    lastDoc.getProductId()
-            );
+                    lastDoc.getProductId());
         } : null;
 
         String nextCursor = cursorUtil.encode(sortValues);
@@ -128,5 +132,36 @@ public class ProductSearchServiceImpl implements ProductSearchService {
                 .toList();
 
         return SearchScrollResponse.of(responses, nextCursor, hasNext);
+    }
+
+    /**
+     * 검색 로그 이벤트 발행
+     */
+    private void logSearchEvent(String keyword, Long categoryId, ProductSortType sortType,
+                                Double minPrice, Double maxPrice, List<String> optionFilters,
+                                String cursor, int limit,
+                                SearchScrollResponse<ProductPreviewResponse> result,
+                                long duration, boolean cacheHit) {
+
+        String normalizedKeyword = keyword != null ?
+                normalizationService.normalizeKeyword(keyword) : null;
+
+        SearchLogEvent event = searchLogService.createLogEventBuilder("PRODUCT")
+                .originalKeyword(keyword)
+                .normalizedKeyword(normalizedKeyword)
+                .categoryId(categoryId)
+                .sortType(sortType.name())
+                .minPrice(minPrice)
+                .maxPrice(maxPrice)
+                .optionFilters(optionFilters)
+                .resultCount(result.contents().size())
+                .searchDuration(duration)
+                .cacheHit(cacheHit)
+                .cursor(cursor)
+                .limit(limit)
+                .hasNext(result.hasNext())
+                .build();
+
+        searchLogService.logSearch(event);
     }
 }
